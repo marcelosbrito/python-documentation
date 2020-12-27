@@ -4,11 +4,16 @@
   "description": "- Python Documentation project built as part of freeCodeCamp Project Challenge #4",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "gh-pages -d dist"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcelosbrito/python-documentation.git"
+  },
+  "author": "Marcelo Brito",
   "license": "ISC",
   "dependencies": {
-    "gh-pages": "^3.1.0"
+    "gh-pages": "^3.1.0",
+    "homepage": "https://marcelosbrito.github.io/python-documentation/"
   }
 }
