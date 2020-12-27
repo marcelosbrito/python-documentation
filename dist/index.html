@@ -1,0 +1,382 @@
+<!doctype html>
+<html>
+
+    <head>
+        <!-- Metadata -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Fav Icon -->
+        <link rel="icon" type="image/png" href="./img/py.png" />
+    
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="./css/style.css" media="screen">
+
+        <!-- Page title (appears on the tab) -->
+        <title>Python Documentation</title>
+    </head>
+
+    <body>
+        <!-- Nav Menu -->
+        <nav id="navbar">
+        <header>Python Documentation</header>
+        <ul>
+            <li><a class="nav-link" href="#Introduction">Introduction</a></li>
+            <li><a class="nav-link" href="#Lexical_analysis">Lexical analysis</a></li>
+            <li><a class="nav-link" href="#Data_model">Data model</a></li>
+            <li><a class="nav-link" href="#Execution_model">Execution model</a></li>
+            <li><a class="nav-link" href="#The_import_system">The import system</a></li>
+            <li><a class="nav-link" href="#Expressions">Expressions</a></li>
+            <li><a class="nav-link" href="#Simple_statements">Simple statements</a></li>
+            <li><a class="nav-link" href="#Compound_statements">Compound statements</a></li>
+            <li><a class="nav-link" href="#Top-level_components">Top-level components</a></li>
+            <li><a class="nav-link" href="#Full_Grammar_specification">Full Grammar specification</a></li>
+            <li><a class="nav-link" href="#Reference">Reference</a></li>
+        </ul>
+    </nav>
+    <main id="main-doc">
+        <section class="main-section" id="Introduction">
+        <header>Introduction</header>
+        <article>
+            <p>
+                This reference manual describes the Python programming language. It is not intended as a tutorial.
+                While I am trying to be as precise as possible, I chose to use English rather than formal specifications for everything except syntax and lexical analysis. This should make the document more understandable to the average reader, but will leave room for ambiguities. Consequently, if you were coming from Mars and tried to re-implement Python from this document alone, you might have to guess things and in fact you would probably end up implementing quite a different language. On the other hand, if you are using Python and wonder what the precise rules about a particular area of the language are, you should definitely be able to find them here. If you would like to see a more formal definition of the language, maybe you could volunteer your time — or invent a cloning machine :-).
+            </p>
+            <p>
+                It is dangerous to add too many implementation details to a language reference document — the implementation may change, and other implementations of the same language may work differently. On the other hand, CPython is the one Python implementation in widespread use (although alternate implementations continue to gain support), and its particular quirks are sometimes worth being mentioned, especially where the implementation imposes additional limitations. Therefore, you’ll find short “implementation notes” sprinkled throughout the text.
+                Every Python implementation comes with a number of built-in and standard modules. These are documented in The Python Standard Library. A few built-in modules are mentioned when they interact in a significant way with the language definition.
+            </p>
+            <h3>1.1. Alternate Implementations</h3>
+            <p>
+                Though there is one Python implementation which is by far the most popular, there are some alternate implementations which are of particular interest to different audiences. Known implementations include:
+            </p>
+            <ul>
+            <li>
+                CPython
+                    <p>
+                        This is the original and most-maintained implementation of Python, written in C. New language features generally appear here first.
+                    </p>
+            </li>
+            <li>
+                Jython
+                    <p>
+                        Python implemented in Java. This implementation can be used as a scripting language for Java applications, or can be used to create applications using the Java class libraries. It is also often used to create tests for Java libraries. More information can be found at the Jython website.
+                    </p>
+            </li>
+            <li>
+                Python for .NET
+                    <p>
+                        This implementation actually uses the CPython implementation, but is a managed .NET application and makes .NET libraries available. It was created by Brian Lloyd. For more information, see the Python for .NET home page.
+                    </p>
+            </li>
+            <li>
+                IronPython
+                    <p>
+                        An alternate Python for .NET. Unlike Python.NET, this is a complete Python implementation that generates IL, and compiles Python code directly to .NET assemblies. It was created by Jim Hugunin, the original creator of Jython. For more information, see the IronPython website.
+                    </p>
+            </li>
+            <li>
+                PyPy
+                    <p>
+                        An implementation of Python written completely in Python. It supports several advanced features not found in other implementations like stackless support and a Just in Time compiler. One of the goals of the project is to encourage experimentation with the language itself by making it easier to modify the interpreter (since it is written in Python). Additional information is available on the PyPy project’s home page.
+                    </p>
+                </li>
+            </ul><br />
+            <p>
+                Each of these implementations varies in some way from the language as documented in this manual, or introduces specific information beyond what’s covered in the standard Python documentation. Please refer to the implementation-specific documentation to determine what else you need to know about the specific implementation you’re using.
+            </p>
+            <h3>1.2. Notation</h3>
+            <p>
+                The descriptions of lexical analysis and syntax use a modified BNF grammar notation. This uses the following style of definition:
+            </p>
+            <code>  name      ::=  lc_letter (lc_letter | "_")*
+                    lc_letter ::=  "a"..."z"
+            </code>
+            <p>
+                The first line says that a name is an lc_letter followed by a sequence of zero or more lc_letters and underscores. An lc_letter in turn is any of the single characters 'a' through 'z'. (This rule is actually adhered to for the names defined in lexical and grammar rules in this document.)
+            </p>
+            <p>
+                Each rule begins with a name (which is the name defined by the rule) and ::=. A vertical bar (|) is used to separate alternatives; it is the least binding operator in this notation. A star (*) means zero or more repetitions of the preceding item; likewise, a plus (+) means one or more repetitions, and a phrase enclosed in square brackets ([ ]) means zero or one occurrences (in other words, the enclosed phrase is optional). The * and + operators bind as tightly as possible; parentheses are used for grouping. Literal strings are enclosed in quotes. White space is only meaningful to separate tokens. Rules are normally contained on a single line; rules with many alternatives may be formatted alternatively with each line after the first beginning with a vertical bar.
+            </p>
+            <p>
+                In lexical definitions (as the example above), two more conventions are used: Two literal characters separated by three dots mean a choice of any single character in the given (inclusive) range of ASCII characters. A phrase between angular brackets (<...>) gives an informal description of the symbol defined; e.g., this could be used to describe the notion of ‘control character’ if needed.
+            </p>
+            <p>
+                Even though the notation used is almost the same, there is a big difference between the meaning of lexical and syntactic definitions: a lexical definition operates on the individual characters of the input source, while a syntax definition operates on the stream of tokens generated by the lexical analysis. All uses of BNF in the next chapter (“Lexical Analysis”) are lexical definitions; uses in subsequent chapters are syntactic definitions.
+            </p>
+        </article>
+        </section>
+        <section class="main-section" id="Lexical_analysis">
+            <header>Lexical analysis</header>
+            <article>
+            <p>
+                A Python program is read by a parser. Input to the parser is a stream of tokens, generated by the lexical analyzer. This chapter describes how the lexical analyzer breaks a file into tokens.
+            </p>
+            <p>
+                Python reads program text as Unicode code points; the encoding of a source file can be given by an encoding declaration and defaults to UTF-8, see PEP 3120 for details. If the source file cannot be decoded, a SyntaxError is raised.
+            </p>
+            <h3>2.1. Line structure</h3>
+            <p>
+                A Python program is divided into a number of logical lines.
+            </p>
+            <ul>
+                <li>
+                    Logical lines
+                </li>
+                <li>Physical lines</li>
+                <li>
+                    Comments
+                </li>
+                <li>
+                    Encoding declarations
+                </li>
+                <li>
+                    Explicit line joining
+                </li>
+                <li>
+                    Implicit line joining
+                </li>
+                <li>
+                    Blank lines
+                </li>
+                <li>
+                    Indentation
+                </li>
+                <li>
+                    Whitespace between tokens
+                </li>
+            </ul>
+        </article>
+        </section>
+        <section class="main-section" id="Data_model">
+        <header>Data model</header>
+        <article>
+            <h3>3.1. Objects, values and types</h3>
+            <p>
+                Objects are Python’s abstraction for data. All data in a Python program is represented by objects or by relations between objects. (In a sense, and in conformance to Von Neumann’s model of a “stored program computer”, code is also represented by objects.)
+            </p>
+
+            <p>
+                Every object has an identity, a type and a value. An object’s identity never changes once it has been created; you may think of it as the object’s address in memory. The ‘is’ operator compares the identity of two objects; the id() function returns an integer representing its identity.
+            </p>
+            <p>
+                <strong>CPython implementation detail:</strong> For CPython, id(x) is the memory address where x is stored. An object’s type determines the operations that the object supports (e.g., “does it have a length?”) and also defines the possible values for objects of that type. The type() function returns an object’s type (which is an object itself). Like its identity, an object’s type is also unchangeable. 
+            </p>            
+        </article>
+        </section>
+        <section class="main-section" id="Execution_model">
+            <header>Execution model</header>
+            <article>
+            <h3>4.1. Structure of a program</h3>
+                <p>
+                    A Python program is constructed from code blocks. A block is a piece of Python program text that is executed as a unit. The following are blocks: a module, a function body, and a class definition. Each command typed interactively is a block. A script file (a file given as standard input to the interpreter or specified as a command line argument to the interpreter) is a code block. A script command (a command specified on the interpreter command line with the -c option) is a code block. A module run as a top level script (as module __main__) from the command line using a -m argument is also a code block. The string argument passed to the built-in functions eval() and exec() is a code block. A code block is executed in an execution frame. A frame contains some administrative information (used for debugging) and determines where and how execution continues after the code block’s execution has completed.
+                </p>
+                <br />
+                <p>
+                    Class definition blocks and arguments to exec() and eval() are special in the context of name resolution. A class definition is an executable statement that may use and define names. These references follow the normal rules for name resolution with an exception that unbound local variables are looked up in the global namespace. The namespace of the class definition becomes the attribute dictionary of the class. The scope of names defined in a class block is limited to the class block; it does not extend to the code blocks of methods – this includes comprehensions and generator expressions since they are implemented using a function scope. This means that the following will fail:
+                </p>
+                <code>class A:
+                    a = 42
+                    b = list(a + i for i in range(10))
+                </code>
+        </article>
+        </section>
+        <section class="main-section" id="The_import_system">
+            <header> The import system</header>
+            <p>
+                Python code in one module gains access to the code in another module by the process of importing it. The import statement is the most common way of invoking the import machinery, but it is not the only way. Functions such as importlib.import_module() and built-in __import__() can also be used to invoke the import machinery.
+            </p><br />
+            <p>
+                The import statement combines two operations; it searches for the named module, then it binds the results of that search to a name in the local scope. The search operation of the import statement is defined as a call to the __import__() function, with the appropriate arguments. The return value of __import__() is used to perform the name binding operation of the import statement. See the import statement for the exact details of that name binding operation.
+            </p><br />
+            <p>
+                A direct call to __import__() performs only the module search and, if found, the module creation operation. While certain side-effects may occur, such as the importing of parent packages, and the updating of various caches (including sys.modules), only the import statement performs a name binding operation.
+            </p>
+        </section>
+        <section class="main-section" id="Expressions">
+        <header>Expressions</header>
+        <article>
+            This chapter explains the meaning of the elements of expressions in Python.
+            <p>
+                <strong>Syntax Notes:</strong> In this and the following chapters, extended BNF notation will be used to describe syntax, not lexical analysis. When (one alternative of) a syntax rule has the form
+                <code>name ::=  othername</code> 
+                and no semantics are given, the semantics of this form of name are the same as for othername.
+            </p>
+            <h3>6.1. Arithmetic conversions</h3>
+            <p>
+                When a description of an arithmetic operator below uses the phrase “the numeric arguments are converted to a common type”, this means that the operator implementation for built-in types works as follows:
+            </p>    
+            <ul>
+                <li>If either argument is a complex number, the other is converted to complex;</li>
+                <li>otherwise, if either argument is a floating point number, the other is converted to floating point;</li>
+                <li>otherwise, both must be integers and no conversion is necessary.</li>
+                <li>Some additional rules apply for certain operators (e.g., a string as a left argument to the ‘%’ operator).</li>
+                <li>Extensions must define their own conversion behavior.</li>
+            </ul>    
+            <h3>6.2. Atoms</h3>
+            <p>
+                Atoms are the most basic elements of expressions. The simplest atoms are identifiers or literals. Forms enclosed in parentheses, brackets or braces are also categorized syntactically as atoms. The syntax for atoms is:<code> atom      ::=  identifier | literal | enclosure
+                    enclosure ::=  parenth_form | list_display | dict_display | set_display | generator_expression | yield_atom</code>
+            </p>
+        </article>
+        </section>
+        <section class="main-section" id="Simple_statements">
+        <header>Simple statements</header>
+        <article>
+            <p>
+                A simple statement is comprised within a single logical line. Several simple statements may occur on a single line separated by semicolons. The syntax for simple statements is:
+            </p>
+
+            <code>simple_stmt ::=  expression_stmt
+                <tab2> | assert_stmt</tab2>
+                <tab2> | assignment_stmt</tab2>
+                <tab2> | augmented_assignment_stmt</tab2>
+                <tab2> | annotated_assignment_stmt</tab2>
+                <tab2> | pass_stmt</tab2>
+                <tab2> | del_stmt</tab2>
+                <tab2> | return_stmt</tab2>
+                <tab2> | yield_stmt</tab2>
+                <tab2> | raise_stmt</tab2>
+                <tab2> | break_stmt</tab2>
+                <tab2> | continue_stmt</tab2>
+                <tab2> | import_stmt</tab2>
+                <tab2> | future_stmt</tab2>
+                <tab2> | global_stmt</tab2>
+                <tab2> | nonlocal_stmt</tab2>
+            </code>
+
+            <h3>7.1. Expression statements</h3>
+            <p>
+                Expression statements are used (mostly interactively) to compute and write a value, or (usually) to call a procedure (a function that returns no meaningful result; in Python, procedures return the value None). Other uses of expression statements are allowed and occasionally useful. The syntax for an expression statement is:
+            </p>
+    
+            <code>expression_stmt ::=  starred_expression</code>
+
+            <p>
+                An expression statement evaluates the expression list (which may be a single expression). In interactive mode, if the value is not None, it is converted to a string using the built-in repr() function and the resulting string is written to standard output on a line by itself (except if the result is None, so that procedure calls do not cause any output.)
+            </p>
+
+            <h3>7.2. Assignment statements</h3>
+            <p>
+                Assignment statements are used to (re)bind names to values and to modify attributes or items of mutable objects:
+            </p>
+    
+            <code>assignment_stmt ::=  (target_list "=")+ (starred_expression | yield_expression)
+                target_list     ::=  target ("," target)* [","]
+                target          ::=  identifier
+                <tab1> | "(" [target_list] ")"</tab1>
+                <tab1> | "[" [target_list] "]"</tab1>
+                <tab1> | attributeref</tab1>
+                <tab1> | subscription</tab1>
+                <tab1> | slicing</tab1>
+                <tab1> | "*" target</tab1></code>
+        </article>
+        </section>
+        <section class="main-section" id="Compound_statements">
+          <header>Compound statements</header>
+          <article>
+            <p>
+                Compound statements contain (groups of) other statements; they affect or control the execution of those other statements in some way. In general, compound statements span multiple lines, although in simple incarnations a whole compound statement may be contained in one line.
+            </p>
+      
+            <p>
+                The if, while and for statements implement traditional control flow constructs. try specifies exception handlers and/or cleanup code for a group of statements, while the with statement allows the execution of initialization and finalization code around a block of code. Function and class definitions are also syntactically compound statements.
+            </p>
+      
+            <p>
+                A compound statement consists of one or more ‘clauses.’ A clause consists of a header and a ‘suite.’ The clause headers of a particular compound statement are all at the same indentation level. Each clause header begins with a uniquely identifying keyword and ends with a colon. A suite is a group of statements controlled by a clause. A suite can be one or more semicolon-separated simple statements on the same line as the header, following the header’s colon, or it can be one or more indented statements on subsequent lines. Only the latter form of a suite can contain nested compound statements; the following is illegal, mostly because it wouldn’t be clear to which if clause a following else clause would belong:
+            </p>
+
+            <code>if test1: if test2: print(x)</code>
+
+            <p>
+                Also note that the semicolon binds tighter than the colon in this context, so that in the following example, either all or none of the print() calls are executed:
+            </p>
+
+            <code>if x < y < z: print(x); print(y); print(z)</code>
+
+            <p>
+                Summarizing:
+            </p>
+
+            <code>compound_stmt ::=  if_stmt
+            <tab2> | while_stmt </tab2> 
+            <tab2> | for_stmt </tab2> 
+            <tab2> | try_stmt</tab2> 
+            <tab2> | with_stmt</tab2> 
+            <tab2> | funcdef</tab2> 
+            <tab2> | classdef</tab2> 
+            <tab2> | async_with_stmt</tab2> 
+            <tab2> | async_for_stmt</tab2> 
+            <tab2> | async_funcdef</tab2> 
+            suite         ::=  stmt_list NEWLINE | NEWLINE INDENT statement+ DEDENT
+            statement     ::=  stmt_list NEWLINE | compound_stmt
+            stmt_list     ::=  simple_stmt (";" simple_stmt)* [";"]</code>
+
+            <p>
+                Note that statements always end in a NEWLINE possibly followed by a DEDENT. Also note that optional continuation clauses always begin with a keyword that cannot start a statement, thus there are no ambiguities (the ‘dangling else’ problem is solved in Python by requiring nested if statements to be indented). The formatting of the grammar rules in the following sections places each clause on a separate line for clarity.
+            </p>
+
+        </article>
+        </section>
+        <section class="main-section" id="Top-level_components">
+        <header>Top-level components</header>
+        <article>
+            <p>
+                The Python interpreter can get its input from a number of sources: from a script passed to it as standard input or as program argument, typed in interactively, from a module source file, etc. This chapter gives the syntax used in these cases.
+            </p>
+
+            <ul>
+                <li><strong>Complete Python programs</strong>
+                    <p>
+                        While a language specification need not prescribe how the language interpreter is invoked, it is useful to have a notion of a complete Python program.
+                    </p>
+                </li>
+                <li><strong>File input</strong>
+                    <p>
+                        All input read from non-interactive files has the same form:
+                    </p>
+                    <code>file_input ::=  (NEWLINE | statement)*</code>
+                </li>
+                <li><strong>Interactive input</strong>
+                    <p>
+                        Input in interactive mode is parsed using the following grammar:
+                    </p>
+                    <code>interactive_input ::=  [stmt_list] NEWLINE | compound_stmt NEWLINE</code>
+                </li>
+                <li><strong>Expression input</strong>
+                    <p>
+                        eval() is used for expression input. It ignores leading whitespace. The string argument to eval() must have the following form:
+                    </p>
+                    <code>eval_input ::=  expression_list NEWLINE*</code>
+                </li>
+            </ul>
+        </article>
+        </section>
+        <section class="main-section" id="Full_Grammar_specification">
+            <header>Full Grammar specification</header>
+            <article>
+            <p>
+                This is the full Python grammar, derived directly from the grammar used to generate the CPython parser (see Grammar/python.gram). The version here omits details related to code generation and error recovery.
+            </p>
+
+            <p>
+                The notation is a mixture of EBNF and PEG. In particular, & followed by a symbol, token or parenthesized group indicates a positive lookahead (i.e., is required to match but not consumed), while ! indicates a negative lookahead (i.e., is required _not_ to match). We use the | separator to mean PEG’s “ordered choice” (written as / in traditional PEG grammars).
+            </p>
+        </article>
+        </section>
+        <section class="main-section" id="Reference">
+        <header>Reference</header>
+        <article>
+            <ul>
+                <li>
+                    All the documentation in this page is taken from <a href="https://www.python.org/doc/" target="_blank">python.org</a>
+                </li>
+            </ul>
+        </article>
+        </section>
+    </main>
+
+    </body>
+
+</html>
